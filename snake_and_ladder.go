@@ -110,6 +110,28 @@ func generate_entities(num int) {
 	for idx := 0; idx < number_of_ladders; idx++ {
 		ladders = append(ladders, ladder{}.generate_entity(num))
 	}
+	// Remove snakes and ladders which collide
+	for _, snake_entity := range snakes {
+		for _, ladder_entity := range ladders {
+			if !(snake_entity.head.can_exist_when(&ladder_entity.top) && snake_entity.tail.can_exist_when(&ladder_entity.bottom)) {
+				fmt.Println("[DEBUG]: Found unexpected generation! Some operation will be performed")
+				print_current_state()
+				// remove either snake or ladder
+				random_remover := rand.Intn(2) % 2
+				if random_remover == 0 {
+					snakes = snakes[:len(snakes)-1]
+				} else {
+					ladders = ladders[:len(ladders)-1]
+				}
+			}
+		}
+	}
+	// Remove snakes which have head in winner's place
+	for idx, snake_entity := range snakes {
+		if !snake_entity.head.can_exist_when(&point{grid_size - 1, grid_size - 1, 0}) {
+			snakes = append(snakes[:idx], snakes[idx+1])
+		}
+	}
 }
 
 func get_player_names() error {
@@ -154,15 +176,33 @@ func print_current_state() {
 	}
 }
 
-func generate_end_points(num int) (*point, *point) {
+func generate_end_points(num int, entity_type string) (*point, *point) {
 	first := get_point(num)
 	second := get_point(num)
 	// TODO: Make this very random and interesting
-	for !(second.can_exist_when(first) && first.can_be_on_top(second)) {
+	for !(second.can_exist_when(first) && first.can_be_on_top(second) && entity_type_can_have(first, second, entity_type)) {
 		first = get_point(num)
 		second = get_point(num)
 	}
 	return first, second
+}
+
+func entity_type_can_have(first *point, second *point, entity_type string) bool {
+	if entity_type == snakes_str {
+		for _, ele := range ladders {
+			if result := ele.bottom.can_exist_when(first); !result {
+				return false
+			}
+		}
+	}
+	if entity_type == ladder_str {
+		for _, ele := range snakes {
+			if result := ele.head.can_exist_when(second); !result {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func play_game() {
@@ -246,13 +286,15 @@ func (l *ladder) print() {
 
 func (s snake) generate_entity(num int) snake {
 	// assign generated values
-	s.set_points(generate_end_points(num))
+	first, second := generate_end_points(num, snakes_str)
+	s.set_points(first, second)
 	return s
 }
 
 func (l ladder) generate_entity(num int) ladder {
 	// assign generated values
-	l.set_points(generate_end_points(num))
+	first, second := generate_end_points(num, ladder_str)
+	l.set_points(first, second)
 	return l
 }
 
