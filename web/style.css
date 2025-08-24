@@ -1,0 +1,87 @@
+*{box-sizing:border-box}
+body{margin:0;font-family:'Poppins',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial; background:#f5f7fb; color:#0f172a}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid #e5e7eb;background:#ffffff;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:22px;color:#1f2937}
+.game-id{color:#64748b}
+.app{max-width:1200px;margin:0 auto}
+.board-section{display:flex;gap:18px;padding:18px}
+canvas{background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;box-shadow:0 8px 24px rgba(31,41,55,.06)}
+.sidebar{width:260px;display:flex;flex-direction:column;gap:12px}
+.dice{height:180px;display:flex;align-items:center;justify-content:center;background:#ffffff;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 6px 18px rgba(99,102,241,.15);perspective:600px;padding:12px;overflow:hidden;margin-bottom:6px}
+.dice .cube{position:relative;width:96px;height:96px;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.dice .face{position:absolute;width:96px;height:96px;background:linear-gradient(145deg,#e5e7eb,#ffffff);border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 6px rgba(0,0,0,.08)}
+.dice .pip{width:12px;height:12px;background:#111827;border-radius:50%;position:absolute}
+.dice .face.one .pip{left:42px;top:42px}
+.dice .face.two .pip:nth-child(1){left:18px;top:18px}
+.dice .face.two .pip:nth-child(2){right:18px;bottom:18px}
+.dice .face.three .pip:nth-child(1){left:18px;top:18px}
+.dice .face.three .pip:nth-child(2){left:42px;top:42px}
+.dice .face.three .pip:nth-child(3){right:18px;bottom:18px}
+.dice .face.four .pip:nth-child(1){left:18px;top:18px}
+.dice .face.four .pip:nth-child(2){right:18px;top:18px}
+.dice .face.four .pip:nth-child(3){left:18px;bottom:18px}
+.dice .face.four .pip:nth-child(4){right:18px;bottom:18px}
+.dice .face.five .pip:nth-child(1){left:18px;top:18px}
+.dice .face.five .pip:nth-child(2){right:18px;top:18px}
+.dice .face.five .pip:nth-child(3){left:42px;top:42px}
+.dice .face.five .pip:nth-child(4){left:18px;bottom:18px}
+.dice .face.five .pip:nth-child(5){right:18px;bottom:18px}
+.dice .face.six .pip:nth-child(1){left:18px;top:14px}
+.dice .face.six .pip:nth-child(2){right:18px;top:14px}
+.dice .face.six .pip:nth-child(3){left:18px;top:42px}
+.dice .face.six .pip:nth-child(4){right:18px;top:42px}
+.dice .face.six .pip:nth-child(5){left:18px;bottom:14px}
+.dice .face.six .pip:nth-child(6){right:18px;bottom:14px}
+.dice .face{transform:translateZ(48px)}
+.dice .face.back{transform:rotateY(180deg) translateZ(48px)}
+.dice .face.right{transform:rotateY(90deg) translateZ(48px)}
+.dice .face.left{transform:rotateY(-90deg) translateZ(48px)}
+.dice .face.top{transform:rotateX(90deg) translateZ(48px)}
+.dice .face.bottom{transform:rotateX(-90deg) translateZ(48px)}
+.dice .cube.show-1{transform:rotateX(0deg) rotateY(0deg)}
+.dice .cube.show-2{transform:rotateX(-90deg) rotateY(0deg)}
+.dice .cube.show-3{transform:rotateY(90deg)}
+.dice .cube.show-4{transform:rotateY(-90deg)}
+.dice .cube.show-5{transform:rotateX(90deg)}
+.dice .cube.show-6{transform:rotateX(0deg) rotateY(180deg)}
+.dice.rolling .cube{animation:spin3d .9s linear infinite}
+@keyframes spin3d{0%{transform:rotateX(0) rotateY(0)}50%{transform:rotateX(180deg) rotateY(180deg)}100%{transform:rotateX(360deg) rotateY(360deg)}}
+#rollBtn{padding:12px;border:0;border-radius:10px;background:#f97316;color:white;cursor:pointer;font-weight:600;box-shadow:0 6px 18px rgba(249,115,22,.25)}
+#rollBtn:hover{background:#ea580c}
+#rollBtn:disabled{background:#cbd5e1;color:#475569;cursor:not-allowed;box-shadow:none}
+.turn,.last,.winner{padding:10px 12px;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px}
+.winner{border-color:#22c55e;background:#dcfce7}
+.turn:empty,.winner:empty,.last:empty{display:none}
+.players{display:flex;gap:8px;flex-wrap:wrap}
+.player{padding:6px 10px;background:#ffffff;border:1px solid #e5e7eb;border-radius:999px}
+
+/* Modal */
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,rgba(15,23,42,.25),rgba(15,23,42,.35));backdrop-filter:blur(6px)}
+.modal.visible{display:flex;animation:fadeIn .2s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+
+/* Fancy card with gradient border and subtle pattern */
+.modal-content{position:relative;width:min(760px,96vw);border-radius:18px;padding:22px 22px;background:
+  linear-gradient(#ffffff,#ffffff) padding-box,
+  linear-gradient(135deg,#93c5fd,#f5d0fe,#86efac) border-box;
+border:2px solid transparent;box-shadow:0 18px 50px rgba(31,41,55,.18)}
+.modal-content::before{content:"";position:absolute;inset:-2px;border-radius:20px;pointer-events:none;background:radial-gradient(120px 50px at 20% 0%,rgba(99,102,241,.18),transparent),radial-gradient(160px 60px at 90% 20%,rgba(34,197,94,.18),transparent),radial-gradient(120px 60px at 10% 90%,rgba(236,72,153,.14),transparent)}
+.modal-content h2{margin:4px 0 14px 0;color:#0f172a;font-size:26px;letter-spacing:.2px}
+
+.grid-row{display:flex;gap:12px;align-items:center;margin:12px 0}
+.grid-row label{font-weight:600;color:#334155}
+.grid-row input{width:110px;padding:12px 12px;border-radius:12px;border:1px solid #e2e8f0;background:#ffffff;box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.grid-row input:focus{outline:none;border-color:#60a5fa;box-shadow:0 0 0 4px rgba(59,130,246,.15)}
+
+.players-config{margin:12px 0}
+.player-inputs{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.player-inputs input{padding:12px;border-radius:12px;border:1px solid #e2e8f0;background:#ffffff}
+.player-inputs input:focus{outline:none;border-color:#a78bfa;box-shadow:0 0 0 4px rgba(168,139,250,.15)}
+
+.link-btn{border:0;background:transparent;color:#2563eb;cursor:pointer;padding:6px 0;font-weight:600}
+.link-btn:hover{text-decoration:underline}
+
+.actions{display:flex;justify-content:flex-end;margin-top:16px}
+.primary{padding:12px 20px;border:0;border-radius:12px;background:linear-gradient(135deg,#22c55e,#16a34a);color:white;font-weight:700;cursor:pointer;box-shadow:0 10px 20px rgba(34,197,94,.25)}
+.primary:hover{filter:brightness(1.05)}
+.error{margin-top:8px;color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:8px 10px;border-radius:10px}
